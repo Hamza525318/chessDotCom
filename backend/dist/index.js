@@ -9,6 +9,8 @@ const socket_io_1 = require("socket.io");
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
+const db_1 = require("./utils/db");
+const socket_1 = require("./socket");
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, {
@@ -19,6 +21,9 @@ const io = new socket_io_1.Server(server, {
 });
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+//connect to DB
+(0, db_1.connectDB)();
+(0, socket_1.setupSocket)(io);
 app.get("/", (req, res) => {
     res.send("Welcome to chess.com backen");
 });

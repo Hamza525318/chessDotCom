@@ -16,5 +16,12 @@ class GameManager {
             return this.games.get(gameId);
         }
     }
+    findGameByPlayerId(userId) {
+        for (const game of this.games.values()) {
+            if (game.player1.id == userId || game.player2.id == userId) {
+                return game;
+            }
+        }
+    }
 }
 exports.GameManager = GameManager;

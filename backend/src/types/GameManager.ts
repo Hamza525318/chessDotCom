@@ -1,6 +1,7 @@
 import {Game } from './Game';
 import {User} from './User';
 import {v4 as uuidv4} from 'uuid';
+import { Socket } from 'socket.io';
 
 
 export class GameManager{
@@ -30,5 +31,10 @@ export class GameManager{
                 return game;
             }
         }
+    }
+
+    gameHandler(socket: Socket){
+        
+        
     }
 }

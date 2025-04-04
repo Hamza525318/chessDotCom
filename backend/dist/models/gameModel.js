@@ -16,9 +16,10 @@ const gameSchema = new mongoose_1.default.Schema({
     player2: String,
     gameId: String,
     moves: [moveSchema],
-    gameStart: { default: Date.now },
+    gameStart: { type: Date, default: Date.now },
     status: { type: String, default: 'ongoing' },
-    winner: { type: String, default: null }
+    winner: { type: String, default: null },
+    board: String
 });
 const gameModel = mongoose_1.default.model('chessGame', gameSchema);
 exports.default = gameModel;

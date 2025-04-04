@@ -22,11 +22,13 @@ const waitingQueue = [];
 function setupSocket(io) {
     const gameManager = new GameManager_1.GameManager();
     io.on('connection', (socket) => {
-        console.log(`User connected: ${socket.id}`);
+        console.log("User connected");
         socket.on('init_game', (payload) => __awaiter(this, void 0, void 0, function* () {
             const { id, email } = payload;
             const newUser = new User_1.User(id, email, socket);
+            waitingQueue.push(newUser);
             if (waitingQueue.length > 1) {
+                waitingQueue.filter((user) => user.id === id);
                 const player2 = waitingQueue.shift();
                 if (!player2)
                     return;
@@ -58,8 +60,26 @@ function setupSocket(io) {
                     socket.emit("error", { message: "Error while finding match. Please retry!!" });
                 }
             }
-            console.log(`User added to queue: ${id} (${email})`);
         }));
+        socket.on('reconnect_game', (payload) => {
+            const { userId } = payload;
+            const IsPlayerexistedInGame = gameManager.findGameByPlayerId(userId);
+            if (!IsPlayerexistedInGame)
+                return;
+            const player1 = IsPlayerexistedInGame.player1.id === userId;
+            const player = player1 ? IsPlayerexistedInGame.player1 : IsPlayerexistedInGame.player2;
+            player.socket = socket;
+            socket.join(IsPlayerexistedInGame.gameId);
+            socket.emit('reconnected', {
+                gameId: IsPlayerexistedInGame.gameId,
+                opponent: player1 ? IsPlayerexistedInGame.player2.id : IsPlayerexistedInGame.player1.id,
+                moves: IsPlayerexistedInGame.moves,
+                youAre: player1 ? 'white' : 'black'
+            });
+            // Optionally notify the opponent
+            const opponent = player1 ? IsPlayerexistedInGame.player2 : IsPlayerexistedInGame.player1;
+            opponent.socket.emit('opponent_reconnected', { id: player.id });
+        });
         socket.on('disconnect', () => {
             console.log("User disconnected");
             // Optional: remove user from waitingQueue if needed

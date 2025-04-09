@@ -1,15 +1,17 @@
 import {Game } from './Game';
 import {User} from './User';
 import {v4 as uuidv4} from 'uuid';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 
 export class GameManager{
 
     games: Map<string, Game>
+    io: Server
 
-    constructor(){
+    constructor(io: Server) {
         this.games = new Map();
+        this.io = io;
     }
 
     addNewGame(player1: User,player2: User,gameId: string): Game{
@@ -35,6 +37,14 @@ export class GameManager{
 
     gameHandler(socket: Socket){
         
-        
+        socket.on('make_move',(payload:{gameId: string,from: string,to: string})=>{
+
+           const {gameId,from,to} = payload;
+           const game = this.getGameById(gameId);
+           if(!game) return;
+           const currPlayer: User = socket.id === game?.player1.socket.id ? game.player1 : game.player2;
+
+           game.makeMove(currPlayer,{from:from,to:to},this.io);
+        }) 
     }
 }

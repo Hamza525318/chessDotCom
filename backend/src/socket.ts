@@ -10,7 +10,7 @@ const waitingQueue: User[] = [];
 
 
 export function setupSocket(io: Server) {
-  const gameManager = new GameManager();
+  const gameManager = new GameManager(io);
   io.on('connection', (socket: Socket) => {
      
     console.log("User connected")
@@ -60,12 +60,13 @@ export function setupSocket(io: Server) {
       
             socket.join(gameId);
             player2.socket.join(gameId);
-            io.to(gameId).emit('match_found', {
+            io.to(gameId).emit('start_game', {
               gameId,
               players: [
                 { id: newUser.id, email: newUser.email },
                 { id: player2.id, email: player2.email }
-              ]
+              ],
+              board: gameManager.getGameById(gameId)?.board.board()
             });
       
           } catch (error) {
